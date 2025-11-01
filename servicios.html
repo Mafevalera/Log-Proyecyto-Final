@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos y Servicios | LogisPro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">LogisPro</div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="servicios.html" class="active-link">Servicios & Precios</a></li>
+                    <li><a href="testimonios.html">Testimonios</a></li>
+                    <li><a href="ubicacion.html">Ubicación</a></li>
+                    <li><a href="contacto.html">Agenda tu Cita!</a></li>
+                    <li class="cta-nav"><a href="contacto.html"><i class="fab fa-whatsapp"></i> Chat IA</a></li>
+                </ul>
+            </nav>
+            <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h2>Catálogo de Soluciones Inteligentes</h2>
+                <p>Descubre los planes y servicios que transformarán tu logística. Los datos a continuación son cargados desde Firebase en tiempo real.</p>
+            </div>
+        </section>
+
+        <section id="services-list" class="content-section">
+            <div class="container">
+                <h2 class="section-title">Elige el Plan de Transformación que Necesitas</h2>
+                
+                <!-- Contenedor donde se cargarán dinámicamente los productos -->
+                <div id="services-grid" class="card-grid product-list">
+                    <div class="services-loading" style="grid-column: 1 / -1; text-align: center; padding: 50px; font-size: 1.2em; color: #777;">
+                        <i class="fas fa-spinner fa-spin"></i> Cargando planes de servicio...
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 50px;">
+                    <a href="contacto.html" class="btn btn-primary" style="margin-top: 15px;">Agenda una Consultoría Gratuita</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>LogisPro</h4>
+                    <p>Logística Inteligente y Sostenible.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Navegación</h4>
+                    <ul>
+                        <li><a href="servicios.html">Servicios & Precios</a></li>
+                        <li><a href="testimonios.html">Testimonios</a></li>
+                        <li><a href="contacto.html">Contacto</a></li>
+                        <li><a href="ubicacion.html">Ubicación</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h4>Síguenos</h4>
+                    <a href="#" class="social-icon" title="Asistente IA"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="social-icon" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="social-icon" title="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2025 LogisPro. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBLn700mXpVis71azs39hPNxkoeS_esiIM",
+  authDomain: "testing-a230f.firebaseapp.com",
+  projectId: "testing-a230f",
+  storageBucket: "testing-a230f.appspot.com",  // ← mejor este
+  messagingSenderId: "1089767025993",
+  appId: "1:1089767025993:web:b3b59bb2252244502dbe98",
+  measurementId: "G-0P40DZLC82"
+};
+
+// 👇 este es el que sale en tu Firestore
+const appId = "app-test";
+
+let db, auth;
+const servicesGrid = document.getElementById("services-grid");
+
+async function initializeFirebase() {
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  auth = getAuth(app);
+
+  await signInAnonymously(auth);
+  console.log("Firebase: autenticación anónima OK");
+
+  listenForServicesAndPrices();
+}
+
+function listenForServicesAndPrices() {
+  // 👇 ESTA es tu ruta real
+  const collectionPath = `artifacts/${appId}/public/data/services`;
+  console.log("Escuchando en:", collectionPath);
+
+  // 👇 y AQUÍ usamos esa misma ruta (antes estabas poniendo "services" raíz)
+  const servicesCollection = collection(db, collectionPath);
+
+  onSnapshot(
+    servicesCollection,
+    (snapshot) => {
+      console.log("snapshot.size =", snapshot.size);
+      const services = [];
+      snapshot.forEach((doc) => {
+        console.log("doc:", doc.id, doc.data());
+        services.push(doc.data());
+      });
+      renderServicesAndPrices(services);
+    },
+    (error) => {
+      console.error("Error al leer servicios:", error);
+      servicesGrid.innerHTML =
+        '<div style="grid-column: 1 / -1; color: red;">Error al cargar servicios.</div>';
+    }
+  );
+}
+
+function renderServicesAndPrices(services) {
+  if (!services || services.length === 0) {
+    servicesGrid.innerHTML =
+      '<div style="grid-column: 1 / -1;">No se encontraron planes de servicio.</div>';
+    return;
+  }
+
+  servicesGrid.innerHTML = "";
+
+  services.forEach((service) => {
+    const title = service.titulo || service.title || "Título Faltante";
+    const description = service.descripcion || service.description || "Descripción Faltante";
+    const price = service.precio || service.precios || service.price || "Consultar Precio";
+
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML = `
+      <h3>${title}</h3>
+      <p>${description}</p>
+      <div class="price">${price}</div>
+      <a href="contacto.html" class="btn btn-primary" style="width: 100%;">Contratar Ahora</a>
+    `;
+    servicesGrid.appendChild(card);
+  });
+}
+
+window.onload = initializeFirebase;
+
+document.querySelector(".menu-toggle").addEventListener("click", () => {
+  document.querySelector(".main-nav").classList.toggle("active");
+});
+</script>

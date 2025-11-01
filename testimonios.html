@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testimonios | LogisPro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilos específicos para la disposición de testimonios en pirámide invertida */
+        .testimonials-grid {
+            display: grid;
+            gap: 30px;
+            padding: 20px 0;
+            justify-content: center; /* Centrar las filas */
+        }
+
+        /* Primera fila: 3 testimonios */
+        .testimonials-grid.row-3 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            max-width: 1000px; /* Limita el ancho de esta fila */
+            margin: 0 auto;
+        }
+
+        /* Segunda fila: 2 testimonios */
+        .testimonials-grid.row-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            max-width: 650px; /* Limita el ancho de esta fila para que se vea más pequeña */
+            margin: 30px auto 0 auto; /* Margen superior para separarla de la anterior */
+        }
+
+        /* Estilo general de las tarjetas de testimonios (ya definido en style.css) */
+        .testimonial-card {
+            background-color: #fff;
+            padding: 30px; /* Un poco menos de padding para que encajen mejor */
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--color-primary);
+            font-style: italic;
+            height: 100%; /* Asegura que todas las tarjetas tengan la misma altura si el contenido es similar */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .testimonial-card p:last-child {
+            font-style: normal;
+            font-weight: bold;
+            margin-top: 15px;
+            color: var(--color-dark);
+            text-align: right;
+            line-height: 1.3;
+        }
+
+        /* Responsividad para la pirámide invertida */
+        @media (max-width: 900px) {
+            .testimonials-grid.row-3,
+            .testimonials-grid.row-2 {
+                grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+                max-width: 500px; /* Ajusta el ancho para móvil */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">LogisPro</div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="servicios.html">Servicios & Precios</a></li>
+                    <li><a href="testimonios.html" class="active-link">Testimonios</a></li>
+                    <li><a href="ubicacion.html" >Ubicación</a></li>
+                    <li><a href="contacto.html">Agenda tu Cita!</a></li>
+                    <li class="cta-nav"><a href="contacto.html"><i class="fab fa-whatsapp"></i> Chat IA</a></li>
+                </ul>
+            </nav>
+            <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h2>Experiencias Reales de Nuestros Clientes</h2>
+                <p>Nuestra plataforma de IA ha transformado la forma en que estas empresas gestionan su logística.</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="container">
+                <h3 class="section-title">Lo que Dicen de LogisPro</h3>
+                
+                <!-- Primera fila de 3 testimonios --><div class="testimonials-grid row-3">
+                    <div class="testimonial-card">
+                        <p>"Desde que implementamos LogisPro, la reducción en costos de combustible ha sido notable. El sistema de rutas inteligentes es lo más avanzado que hemos visto. ¡Altamente recomendado!"</p>
+                        <p class="source">- Jorge A. | Gerente de Distribución, ExpressCorp</p>
+                    </div>
+
+                    <div class="testimonial-card">
+                        <p>"El paso de la logística en papel a la digitalización total fue sorprendentemente sencillo. La visibilidad de la flota en tiempo real que ofrece la integración con Firebase es un valor incalculable."</p>
+                        <p class="source">- Luisa M. | CEO, Tech Deliveries</p>
+                    </div>
+
+                    <div class="testimonial-card">
+                        <p>"El soporte por IA que ofrecen es increíblemente rápido y eficiente. Resolver dudas de ruteo complejo en segundos nos permite mantener la operación fluida, incluso de madrugada."</p>
+                        <p class="source">- David P. | Coordinador Logístico, Global Trade Inc.</p>
+                    </div>
+                </div>
+
+                <!-- Segunda fila de 2 testimonios --><div class="testimonials-grid row-2">
+                    <div class="testimonial-card">
+                        <p>"Necesitábamos una solución escalable y LogisPro lo logró. Pudimos duplicar nuestra capacidad de envíos sin contratar más personal, gracias a la automatización de horarios y rutas."</p>
+                        <p class="source">- Ana S. | Fundadora, EcoCommerce</p>
+                    </div>
+
+                    <div class="testimonial-card">
+                        <p>"La interfaz de usuario es muy intuitiva, incluso para personal no técnico. La capacitación fue mínima y los resultados, máximos. ¡Estamos fascinados con la productividad!"</p>
+                        <p class="source">- Carlos V. | Jefe de Operaciones, CityLogistics</p>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 70px;">
+                    <a href="contacto.html" class="btn btn-primary">¡Agenda tu Consulta Gratis Ahora!</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER CONSISTENTE --><footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>LogisPro</h4>
+                    <p>Logística Inteligente y Sostenible.</p>
+                    <p style="font-size: 0.9em; margin-top: 10px;">Transformando la cadena de suministro con IA.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Navegación</h4>
+                    <ul>
+                        <li><a href="servicios.html">Servicios & Precios</a></li>
+                        <li><a href="testimonios.html">Testimonios</a></li>
+                        <li><a href="contacto.html">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h4>Síguenos</h4>
+                    <a href="#" class="social-icon" title="Asistente IA"><i class="fas fa-comment-dots"></i></a>
+                    <a href="#" class="social-icon" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="social-icon" title="Twitter"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2025 LogisPro. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.main-nav').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

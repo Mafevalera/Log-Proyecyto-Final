@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto y Demo | LogisPro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">LogisPro</div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="servicios.html">Servicios & Precios</a></li>
+                    <li><a href="testimonios.html">Testimonios</a></li>
+                    <li><a href="ubicacion.html">Ubicación</a></li>
+                    <li><a href="contacto.html" class="active-link">Agenda tu Cita!</a></li>
+                    <li class="cta-nav"><a href="#" onclick="openWhatsApp()"><i class="fab fa-whatsapp"></i> Chat IA</a></li>
+                </ul>
+            </nav>
+            <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h2>Agenda tu Consulta de Automatización</h2>
+                <p>Completa el formulario y te contactaremos para discutir cómo LogisPro puede transformar tu operación.</p>
+            </div>
+        </section>
+
+        <section id="contact" class="content-section">
+            <div class="contact-container">
+                <p style="text-align: center; margin-bottom: 30px; font-size: 1.1em;">Tu información es enviada a nuestra automatización de Make.ai.</p>
+                
+                <!-- 
+                    IMPORTANTE PARA MAKE.AI: 
+                    Reemplaza "TU_ENDPOINT_DE_MAKE_AI_AQUI" con el URL del Webhook de Make.ai/Make.com. 
+                    El método POST asegura que los datos se envíen al endpoint.
+                -->
+                <form id="schedule-form" action="TU_ENDPOINT_DE_MAKE_AI_AQUI" method="POST">
+                    <div class="form-group">
+                        <label for="name">Nombre Completo</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="company">Compañía</label>
+                        <input type="text" id="company" name="company">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Teléfono</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="service_interest">Servicio de Interés</label>
+                        <select id="service_interest" name="service_interest" required>
+                            <option value="" disabled selected>Selecciona una opción</option>
+                            <option value="Optimizacion de Rutas">Optimización de Rutas (Core IA)</option>
+                            <option value="Integracion Firebase">Integración y Base de Datos (Firebase)</option>
+                            <option value="Formulario Automatizacion">Automatización de Formularios (Make.ai)</option>
+                            <option value="Otro">Otro/Consulta General</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Mensaje / Detalle del Proyecto</label>
+                        <textarea id="message" name="message" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-secondary" style="width: 100%;">Enviar Solicitud</button>
+                    <div id="form-message" style="margin-top: 20px; text-align: center; color: var(--color-primary); font-weight: bold; display: none;"></div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER CONSISTENTE -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>LogisPro</h4>
+                    <p>Logística Inteligente y Sostenible.</p>
+                    <p style="font-size: 0.9em; margin-top: 10px;">Transformando la cadena de suministro con IA.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Navegación</h4>
+                    <ul>
+                        <li><a href="servicios.html">Servicios & Precios</a></li>
+                        <li><a href="testimonios.html">Testimonios</a></li>
+                        <li><a href="contacto.html">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h4>Síguenos</h4>
+                    <a href="#" class="social-icon" title="Asistente IA"><i class="fas fa-comment-dots"></i></a>
+                    <a href="#" class="social-icon" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="social-icon" title="Twitter"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2025 LogisPro. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Funcionalidad de menú móvil
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.main-nav').classList.toggle('active');
+        });
+        
+        // Simulación de envío de formulario para Make.ai
+        document.getElementById('schedule-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); 
+            
+            const form = event.target;
+            const endpoint = form.action;
+            const messageDiv = document.getElementById('form-message');
+            messageDiv.style.display = 'none';
+
+            if (endpoint === "TU_ENDPOINT_DE_MAKE_AI_AQUI") {
+                // Notificación para configurar el Webhook
+                messageDiv.style.display = 'block';
+                messageDiv.textContent = '¡Formulario listo! Configura el webhook de Make.ai en el atributo "action" del formulario para que funcione.';
+                form.reset();
+                return;
+            }
+
+            try {
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    messageDiv.textContent = '¡Gracias! Tu solicitud ha sido enviada a Make.ai con éxito.';
+                    messageDiv.style.display = 'block';
+                    form.reset();
+                } else {
+                    messageDiv.textContent = `Error al enviar: El servidor de automatización respondió con un código ${response.status}.`;
+                    messageDiv.style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('Error de red al enviar el formulario:', error);
+                messageDiv.textContent = 'Error de conexión. Inténtalo de nuevo más tarde.';
+                messageDiv.style.display = 'block';
+            }
+        });
+        
+        function openWhatsApp() {
+            const phoneNumber = '1787xxxxxxx'; 
+            const message = 'Hola LogisPro, estoy interesado/a en la automatización con IA. ¿Podemos conversar?';
+            const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
