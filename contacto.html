@@ -3,9 +3,436 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contacto y Demo | LogisPro</title>
+    <title>Contacto y Solicitud de Carga | LogisPro</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilos específicos para la página de Contacto/Formulario */
+        .page-header {
+            background-color: var(--color-primary);
+            color: var(--color-light);
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .page-header h2 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .contact-content {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 0;
+            gap: 40px;
+        }
+        
+        /* Contenedor del formulario */
+        .form-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--color-light);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilos del Formulario */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--color-dark);
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"],
+        .form-group input[type="date"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--color-primary);
+            outline: none;
+        }
+
+        .phone-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .phone-group select {
+            flex-shrink: 0;
+            width: 120px;
+        }
+
+        .phone-group input {
+            flex-grow: 1;
+        }
+
+        /* Aviso de Fecha */
+        .date-warning {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            background-color: #fffae6; /* Amarillo claro */
+            border: 1px solid #ffcc00;
+            color: #8a6d3b;
+            font-size: 0.9em;
+            display: none; /* Se muestra con JS */
+        }
+
+        /* Mensajes de feedback */
+        #form-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Media Queries para Responsividad */
+        @media (max-width: 768px) {
+            .contact-content {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+        }
+    </style>
+    <!-- Importaciones de Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // CONFIGURACIÓN DE FIREBASE (Su configuración, sin variables globales)
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyDehmyeHH4yj5qU3aCxPttKA8VrRL3AZhQ",
+            authDomain: "logpro-ce2dc.firebaseapp.com",
+            projectId: "logpro-ce2dc",
+            storageBucket: "logpro-ce2dc.firebasestorage.app",
+            messagingSenderId: "488357446545",
+            appId: "1:488357446545:web:dd09a167b082410fdf1030",
+            measurementId: "G-GQZQ86767X"
+        };
+        
+        // El ID de la aplicación para construir la ruta en Firestore.
+        // Usamos el projectId como identificador base para la colección pública.
+        const appId = "app-test";
+
+        // Variables globales
+        let db, auth;
+        let userId = null;
+        
+        setLogLevel('Debug'); // Habilitar logs para depuración
+
+        // Función de inicialización de Firebase (totalmente autocontenida)
+        async function initializeFirebase() {
+            try {
+                // 1. Verificar la configuración
+                if (!FIREBASE_CONFIG || !FIREBASE_CONFIG.apiKey) {
+                    throw new Error("La configuración de Firebase es inválida o está vacía.");
+                }
+                
+                // 2. Inicializar App y Servicios
+                const app = initializeApp(FIREBASE_CONFIG);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // 3. Autenticación (siempre anónima en este entorno sin token especial)
+                await signInAnonymously(auth);
+                console.log("Autenticación anónima exitosa.");
+                
+                // 4. Observar el estado de autenticación para obtener el UID
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid; // Usar el UID generado anónimamente
+                        console.log("Usuario ID (Anónimo):", userId);
+                        loadServicesToDropdown(); 
+                        checkUrlForServicePreselection(); 
+                    } else {
+                        // Esto no debería ocurrir después de signInAnonymously, pero es una buena práctica
+                        console.error("No se pudo obtener el usuario después de la autenticación anónima.");
+                        renderDummyServices();
+                    }
+                });
+
+            } catch (e) {
+                console.error("Error al inicializar las instancias de Firebase:", e);
+                renderDummyServices(); // Mostrar servicios de ejemplo si hay un error fatal
+            }
+        }
+
+        // --- LÓGICA DE CARGA DE SERVICIOS ---
+        function renderDummyServices() {
+            const dropdown = document.getElementById('service-dropdown');
+            dropdown.innerHTML = `<option value="">-- No se pudieron cargar (Ejemplo) --</option>`;
+            // Añadir servicios de ejemplo si falla la conexión
+            ['Optimización de Rutas', 'Consultoría IA', 'Logística Express'].forEach(service => {
+                 dropdown.innerHTML += `<option value="${service}">${service}</option>`;
+            });
+        }
+
+        function loadServicesToDropdown() {
+            if (!db) {
+                renderDummyServices();
+                return;
+            }
+
+            const dropdown = document.getElementById('service-dropdown');
+            if (dropdown.options.length <= 1) { 
+                dropdown.innerHTML = `<option value="">-- Cargando Servicios --</option>`;
+            }
+            
+            // Ruta pública para datos de catálogo de servicios. Se usa el projectId como appId.
+            // artifacts/{projectId}/public/data/servicios
+            const collectionPath = `artifacts/${appId}/public/data/servicios`;
+            const servicesCollection = collection(db, collectionPath);
+            
+            onSnapshot(servicesCollection, (snapshot) => {
+                const title = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+
+                    const serviceTitle = 
+                        data.title ||
+                        data.titulo ||
+                        data.nombre ||
+                        data.name;
+
+                    if (serviceTitle) {
+                        title.push(serviceTitle);
+                    }
+                });
+
+                if (title.length === 0) {
+                    dropdown.innerHTML = `<option value="">-- No hay servicios disponibles --</option>`;
+                    return;
+                }
+
+                dropdown.innerHTML = `<option value="">-- Selecciona un Servicio --</option>`;
+                title.forEach(title => {
+                    dropdown.innerHTML += `<option value="${title}">${title}</option>`;
+                });
+
+                checkUrlForServicePreselection(); 
+            }, (error) => {
+                console.error("Error al obtener los servicios en tiempo real:", error);
+                renderDummyServices(); 
+            });
+        }
+
+        // --- LÓGICA DE PRESELECCIÓN DEL SERVICIO DESDE LA URL ---
+        function checkUrlForServicePreselection() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const serviceName = urlParams.get('service');
+            if (serviceName) {
+                const dropdown = document.getElementById('service-dropdown');
+                const decodedServiceName = decodeURIComponent(serviceName);
+                for (let i = 0; i < dropdown.options.length; i++) {
+                    if (dropdown.options[i].value === decodedServiceName) {
+                        dropdown.value = decodedServiceName;
+                        break;
+                    }
+                }
+            }
+        }
+
+
+        // --- LÓGICA DE VALIDACIÓN DE FECHA ---
+        const DATE_WARNING_THRESHOLD = 5; // Días
+        const dateInput = document.getElementById('pickup-date');
+        const dateWarning = document.getElementById('date-warning');
+        
+        function checkDateWarning() {
+            const selectedDate = dateInput.value;
+            if (!selectedDate) {
+                dateWarning.style.display = 'none';
+                return;
+            }
+
+            const pickupDate = new Date(selectedDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+            
+            const diffTime = pickupDate.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+            if (diffDays <= DATE_WARNING_THRESHOLD) {
+                dateWarning.style.display = 'block';
+            } else {
+                dateWarning.style.display = 'none';
+            }
+        }
+        
+        dateInput.addEventListener('change', checkDateWarning);
+        dateInput.setAttribute('min', new Date().toISOString().split('T')[0]); 
+
+        // --- LÓGICA DE ENVÍO DE FORMULARIO ---
+        const contactForm = document.getElementById('contact-form');
+        const formMessage = document.getElementById('form-message');
+        const submitButton = document.getElementById('submit-btn');
+        
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            // 1. Recoger datos del formulario
+            const formData = new FormData(contactForm);
+            const data = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                countryCode: formData.get('country-code'),
+                phoneNumber: formData.get('phone-number'),
+                service: formData.get('service'),
+                pickupDate: formData.get('pickup-date'),
+                details: formData.get('details'),
+                
+                // Metadatos de la solicitud
+                timestamp: new Date().toISOString(),
+                status: "Pending Approval", 
+                submittedBy: userId,
+            };
+
+            // 2. Validación básica
+            if (!data.name || !data.email || !data.phoneNumber || !data.service || !data.pickupDate) {
+                 showMessage("Por favor, completa todos los campos obligatorios.", 'error');
+                 return;
+            }
+            
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+            try {
+                // 3. Guardar en Firestore (Colección Pública de Consultas/Cargas)
+                if (!db || !userId) {
+                    throw new Error("Base de datos no inicializada o usuario no identificado.");
+                }
+
+                // Usamos la ruta artifacts/{projectId}/public/data/consultations
+                const collectionPath = `artifacts/${appId}/public/data/consultations`;
+                const docRef = await addDoc(collection(db, collectionPath), data);
+                
+                console.log("Documento de consulta guardado en Firestore con ID:", docRef.id);
+                
+                // 4. ENVÍO A MAKE (Aprobación) - Se mantiene el webhook y el reintento
+                const makeWebhookUrl = 'https://hook.us2.make.com/s1sh3sz2i3l61bi78xcvjzkzv790pc7v'; 
+                
+                try {
+                    const maxRetries = 3;
+                    let lastError = null;
+
+                    for (let attempt = 0; attempt < maxRetries; attempt++) {
+                        try {
+                            const response = await fetch(makeWebhookUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ ...data, firestoreDocId: docRef.id }) 
+                            });
+
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+
+                            console.log("Notificación enviada a Make para aprobación.");
+                            lastError = null; 
+                            break; 
+                        } catch (makeError) {
+                            lastError = makeError;
+                            if (attempt < maxRetries - 1) {
+                                const delay = Math.pow(2, attempt) * 1000;
+                                console.log(`Fallo al enviar a Make. Reintentando en ${delay / 1000}s...`);
+                                await new Promise(resolve => setTimeout(resolve, delay));
+                            }
+                        }
+                    }
+
+                    if (lastError) {
+                        throw lastError; 
+                    }
+
+                } catch (makeError) {
+                    console.error("Error definitivo al enviar la notificación al Webhook de Make:", makeError);
+                }
+                
+                showMessage("¡Solicitud enviada con éxito! Recibirás un correo de confirmación pronto.", 'success');
+                contactForm.reset();
+                dateWarning.style.display = 'none';
+
+            } catch (error) {
+                console.error("Error al enviar la solicitud:", error);
+                showMessage("Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo.", 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Enviar Solicitud';
+            }
+        }
+        
+        contactForm.addEventListener('submit', handleSubmit);
+
+        function showMessage(msg, type) {
+            formMessage.textContent = msg;
+            formMessage.className = ''; 
+            formMessage.classList.add(type); 
+            formMessage.style.display = 'block';
+        }
+
+        // Ejecutar la inicialización cuando la ventana cargue
+        window.onload = initializeFirebase;
+        
+        // Lógica para el menú de navegación móvil
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.main-nav').classList.toggle('active');
+        });
+
+        // Configuración de códigos de país (Simplificado para el ejemplo)
+        const countryCodes = [
+            { code: "+52", name: "México" },
+            { code: "+57", name: "Colombia" },
+            { code: "+51", name: "Perú" },
+            { code: "+54", name: "Argentina" },
+            { code: "+56", name: "Chile" },
+            { code: "+1", name: "USA/Canadá" },
+        ];
+        
+        const codeDropdown = document.getElementById('country-code');
+        countryCodes.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.code;
+            option.textContent = `${item.code} (${item.name})`;
+            codeDropdown.appendChild(option);
+        });
+
+    </script>
 </head>
 <body>
     <header>
@@ -17,8 +444,8 @@
                     <li><a href="servicios.html">Servicios & Precios</a></li>
                     <li><a href="testimonios.html">Testimonios</a></li>
                     <li><a href="ubicacion.html">Ubicación</a></li>
-                    <li><a href="contacto.html" class="active-link">Agenda tu Cita!</a></li>
-                    <li class="cta-nav"><a href="#" onclick="openWhatsApp()"><i class="fab fa-whatsapp"></i> Chat IA</a></li>
+                    <li><a href="contacto.html" class="active-link">Agenda tu Consulta!</a></li>
+                    <li class="cta-nav"><a href="contacto.html"><i class="fab fa-whatsapp"></i> Chat IA</a></li>
                 </ul>
             </nav>
             <div class="menu-toggle"><i class="fas fa-bars"></i></div>
@@ -28,80 +455,90 @@
     <main>
         <section class="page-header">
             <div class="container">
-                <h2>Agenda tu Consulta de Automatización</h2>
-                <p>Completa el formulario y te contactaremos para discutir cómo LogisPro puede transformar tu operación.</p>
+                <h2>Agenda tu Consulta y Envía tu Solicitud de Carga</h2>
+                <p>Completa el formulario para que nuestro equipo de logística analice tu caso y apruebe la solicitud.</p>
             </div>
         </section>
 
-        <section id="contact" class="content-section">
-            <div class="contact-container">
-                <p style="text-align: center; margin-bottom: 30px; font-size: 1.1em;">Tu información es enviada a nuestra automatización de Make.ai.</p>
-                
-                <!-- 
-                    IMPORTANTE PARA MAKE.AI: 
-                    Reemplaza "TU_ENDPOINT_DE_MAKE_AI_AQUI" con el URL del Webhook de Make.ai/Make.com. 
-                    El método POST asegura que los datos se envíen al endpoint.
-                -->
-                <form id="schedule-form" action="TU_ENDPOINT_DE_MAKE_AI_AQUI" method="POST">
-                    <div class="form-group">
-                        <label for="name">Nombre Completo</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Correo Electrónico</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="company">Compañía</label>
-                        <input type="text" id="company" name="company">
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Teléfono</label>
-                        <input type="tel" id="phone" name="phone">
-                    </div>
-                    <div class="form-group">
-                        <label for="service_interest">Servicio de Interés</label>
-                        <select id="service_interest" name="service_interest" required>
-                            <option value="" disabled selected>Selecciona una opción</option>
-                            <option value="Optimizacion de Rutas">Optimización de Rutas (Core IA)</option>
-                            <option value="Integracion Firebase">Integración y Base de Datos (Firebase)</option>
-                            <option value="Formulario Automatizacion">Automatización de Formularios (Make.ai)</option>
-                            <option value="Otro">Otro/Consulta General</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Mensaje / Detalle del Proyecto</label>
-                        <textarea id="message" name="message" rows="4"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-secondary" style="width: 100%;">Enviar Solicitud</button>
-                    <div id="form-message" style="margin-top: 20px; text-align: center; color: var(--color-primary); font-weight: bold; display: none;"></div>
-                </form>
+        <section class="section-padding">
+            <div class="container contact-content">
+                <div class="form-container">
+                    <form id="contact-form" action = "https://hook.us2.make.com/s1sh3sz2i3l61bi78xcvjzkzv790pc7v" method="POST">
+                        
+                        <!-- DATOS PERSONALES -->
+                        <div class="form-group">
+                            <label for="name">Nombre Completo (*)</label>
+                            <input type="text" id="name" name="name" required placeholder="Tu nombre o el de tu empresa">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Correo Electrónico (*)</label>
+                            <input type="email" id="email" name="email" required placeholder="tu.correo@ejemplo.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone-number">Número de Teléfono (*)</label>
+                            <div class="phone-group">
+                                <select id="country-code" name="country-code" required>
+                                    <!-- Opciones de código de país generadas por JS -->
+                                </select>
+                                <input type="tel" id="phone-number" name="phone-number" required placeholder="Ej: 809 555 1234">
+                            </div>
+                        </div>
+
+                        <!-- DATOS DE LA SOLICITUD DE CARGA -->
+                        <div class="form-group">
+                            <label for="service-dropdown">Servicio Requerido (*)</label>
+                            <select id="service-dropdown" name="service" required>
+                                <option value="">-- Cargando Servicios --</option>
+                                <!-- Opciones cargadas dinámicamente desde Firebase -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="pickup-date">Fecha de Recogida Deseada (*)</label>
+                            <input type="date" id="pickup-date" name="pickup-date" required>
+                            <div id="date-warning" class="date-warning">
+                                <i class="fas fa-exclamation-triangle"></i> ¡Aviso! La fecha seleccionada es dentro de los próximos 5 días. Esto podría requerir una extensión en el tiempo de procesamiento para aprobación.
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="details">Detalles Adicionales / Preguntas sobre la Carga</label>
+                            <textarea id="details" name="details" rows="5" placeholder="Escribe el tipo de carga, dimensiones, peso, origen, destino y cualquier requerimiento especial."></textarea>
+                        </div>
+
+                        <div id="form-message" style="display: none;"></div>
+
+                        <button type="submit" id="submit-btn" class="btn btn-primary btn-large" style="width: 100%;">
+                            Enviar Solicitud
+                        </button>
+                    </form>
+                </div>
             </div>
         </section>
     </main>
 
-    <!-- FOOTER CONSISTENTE -->
     <footer>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-info">
                     <h4>LogisPro</h4>
                     <p>Logística Inteligente y Sostenible.</p>
-                    <p style="font-size: 0.9em; margin-top: 10px;">Transformando la cadena de suministro con IA.</p>
                 </div>
                 <div class="footer-links">
                     <h4>Navegación</h4>
                     <ul>
-                        <li><a href="servicios.html">Servicios & Precios</a></li>
-                        <li><a href="testimonios.html">Testimonios</a></li>
+                        <li><a href="servicios.html">Servicios</a></li>
+                        <li><a href="index.html#about">Misión/Visión</a></li>
                         <li><a href="contacto.html">Contacto</a></li>
                     </ul>
                 </div>
                 <div class="footer-social">
                     <h4>Síguenos</h4>
-                    <a href="#" class="social-icon" title="Asistente IA"><i class="fas fa-comment-dots"></i></a>
-                    <a href="#" class="social-icon" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
-                    <a href="#" class="social-icon" title="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" id="builderbot-icon" class="social-icon"><i class="fas fa-comment-dots"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
                 </div>
             </div>
             <div class="copyright">
@@ -109,64 +546,5 @@
             </div>
         </div>
     </footer>
-
-    <script>
-        // Funcionalidad de menú móvil
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('.main-nav').classList.toggle('active');
-        });
-        
-        // Simulación de envío de formulario para Make.ai
-        document.getElementById('schedule-form').addEventListener('submit', async function(event) {
-            event.preventDefault(); 
-            
-            const form = event.target;
-            const endpoint = form.action;
-            const messageDiv = document.getElementById('form-message');
-            messageDiv.style.display = 'none';
-
-            if (endpoint === "TU_ENDPOINT_DE_MAKE_AI_AQUI") {
-                // Notificación para configurar el Webhook
-                messageDiv.style.display = 'block';
-                messageDiv.textContent = '¡Formulario listo! Configura el webhook de Make.ai en el atributo "action" del formulario para que funcione.';
-                form.reset();
-                return;
-            }
-
-            try {
-                const formData = new FormData(form);
-                const data = Object.fromEntries(formData.entries());
-
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json' 
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    messageDiv.textContent = '¡Gracias! Tu solicitud ha sido enviada a Make.ai con éxito.';
-                    messageDiv.style.display = 'block';
-                    form.reset();
-                } else {
-                    messageDiv.textContent = `Error al enviar: El servidor de automatización respondió con un código ${response.status}.`;
-                    messageDiv.style.display = 'block';
-                }
-
-            } catch (error) {
-                console.error('Error de red al enviar el formulario:', error);
-                messageDiv.textContent = 'Error de conexión. Inténtalo de nuevo más tarde.';
-                messageDiv.style.display = 'block';
-            }
-        });
-        
-        function openWhatsApp() {
-            const phoneNumber = '1787xxxxxxx'; 
-            const message = 'Hola LogisPro, estoy interesado/a en la automatización con IA. ¿Podemos conversar?';
-            const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-            window.open(url, '_blank');
-        }
-    </script>
 </body>
 </html>

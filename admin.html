@@ -2,31 +2,400 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/main.js" defer></script>
+  <title>Panel de Aprobación | LogisPro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- tu css global -->
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Ajustes pequeños solo para el panel */
+    .admin-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 25px 25px 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.04);
+      margin-bottom: 40px;
+    }
+    .admin-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .admin-header-row h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: var(--color-dark);
+    }
+    .admin-badge {
+      background: rgba(227,6,19,.1);
+      color: var(--color-primary);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .admin-table thead {
+      background: #f8fafc;
+    }
+    .admin-table th,
+    .admin-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: .9rem;
+    }
+    .admin-table th {
+      font-weight: 600;
+      color: #1f2937;
+    }
+    .status-pill {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      font-size: .7rem;
+    }
+    .btn-approve {
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .7rem;
+      text-transform: uppercase;
+    }
+    .btn-reject {
+      background: #dc2626;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .7rem;
+      text-transform: uppercase;
+      margin-left: 6px;
+    }
+    /* login box reutilizando tu estilo */
+    #login-box {
+      max-width: 430px;
+      margin: 60px auto;
+      background: #fff;
+      padding: 30px 30px 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.05);
+    }
+    #login-box h2 {
+      margin-bottom: 10px;
+      color: var(--color-dark);
+    }
+    #login-box input {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: .95rem;
+    }
+    #login-box button {
+      width: 100%;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #login-error {
+      margin-top: 10px;
+      color: #dc2626;
+      font-size: .8rem;
+    }
+    @media (max-width: 768px) {
+      .admin-header-row {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .admin-table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
 </head>
 <body>
+  <!-- header igual que tu sitio -->
   <header>
-    <nav>
-      <ul>
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="mision.html">Misión</a></li>
-        <li><a href="servicios.html">Servicios</a></li>
-        <li><a href="nosotros.html">Nosotros</a></li>
-        <li><a href="testimonios.html">Testimonios</a></li>
-        <li><a href="contacto.html">Contacto</a></li>
-        <li><a href="admin.html">Admin</a></li>
-      </ul>
-    </nav>
+    <div class="container">
+      <div class="logo">LogisPro</div>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="servicios.html">Servicios & Precios</a></li>
+          <li><a href="testimonios.html">Testimonios</a></li>
+          <li><a href="ubicacion.html">Ubicación</a></li>
+          <li><a href="contacto.html">Agenda tu cita</a></li>
+          <li><a href="admin.html" class="active-link">Admin</a></li>
+        </ul>
+      </nav>
+      <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+    </div>
   </header>
-  <main>
-    <h1>Admin</h1>
-    <p>Contenido en construcción...</p>
-  </main>
+
+  <!-- cabecera de página -->
+  <section class="page-header">
+    <div class="container">
+      <h2>Panel de Aprobación</h2>
+      <p>Aprueba o rechaza las solicitudes que llegan desde el formulario.</p>
+    </div>
+  </section>
+
+  <!-- login -->
+  <div id="login-box">
+    <h2>Iniciar sesión (admin)</h2>
+    <p style="margin-bottom:15px;">Usa el correo que creaste en Firebase Authentication.</p>
+    <input type="email" id="admin-email" placeholder="admin@logpro.com">
+    <input type="password" id="admin-pass" placeholder="••••••••">
+    <button id="btn-login">Entrar</button>
+    <p id="login-error" style="display:none;"></p>
+  </div>
+
+  <!-- panel -->
+  <section class="content-section" id="admin-panel" style="display:none;">
+    <div class="container">
+      <div class="admin-card">
+        <div class="admin-header-row">
+          <div>
+            <h2>Solicitudes con estado “Notified”</h2>
+            <p style="color:#6b7280;font-size:.85rem;">Estos son los registros que Make ya notificó y ahora esperan tu aprobación.</p>
+          </div>
+          <div>
+            <span id="admin-user" class="admin-badge">Admin</span>
+            <!-- 👇 añadido SOLO esto -->
+            <button id="btn-logout" class="btn-reject">Salir</button>
+          </div>
+        </div>
+
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Servicio</th>
+              <th>Fecha</th>
+              <th>Teléfono</th>
+              <th>Email</th>
+              <th>Detalles</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="8">Cargando solicitudes...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- footer igual que el tuyo -->
   <footer>
-    <p>&copy; 2025 Gestión Logística de Camiones</p>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-info">
+          <h4>LogisPro</h4>
+          <p>Logística Inteligente y Sostenible.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Navegación</h4>
+          <ul>
+            <li><a href="servicios.html">Servicios & Precios</a></li>
+            <li><a href="testimonios.html">Testimonios</a></li>
+            <li><a href="contacto.html">Contacto</a></li>
+            <li><a href="ubicacion.html">Ubicación</a></li>
+          </ul>
+        </div>
+        <div class="footer-social">
+          <h4>Síguenos</h4>
+          <a href="#" class="social-icon" title="Asistente IA"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" class="social-icon" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+          <a href="#" class="social-icon" title="Instagram"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+      <div class="copyright">
+        &copy; 2025 LogisPro. Todos los derechos reservados.
+      </div>
+    </div>
   </footer>
+
+  <!-- scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged,
+      /* 👇 añadido para poder cerrar sesión */
+      signOut
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      onSnapshot,
+      doc,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
+    // tu mismo config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDehmyeHH4yj5qU3aCxPttKA8VrRL3AZhQ",
+      authDomain: "logpro-ce2dc.firebaseapp.com",
+      projectId: "logpro-ce2dc",
+      storageBucket: "logpro-ce2dc.firebasestorage.app",
+      messagingSenderId: "488357446545",
+      appId: "1:488357446545:web:dd09a167b082410fdf1030"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const loginBox = document.getElementById("login-box");
+    const adminPanel = document.getElementById("admin-panel");
+    const rows = document.getElementById("rows");
+    const adminUserSpan = document.getElementById("admin-user");
+    const loginError = document.getElementById("login-error");
+    const btnLogout = document.getElementById("btn-logout");
+
+    // nav mobile (usa tu mismo js de los otros html)
+    const toggle = document.querySelector('.menu-toggle');
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        document.querySelector('.main-nav').classList.toggle('active');
+      });
+    }
+
+    // 👇 correo permitido añadir mas si necesario
+    const ADMIN_EMAIL = [
+      "mafernandavalera@gmail.com"
+    ];
+
+    function isAdminEmail(email) {
+      return ADMIN_EMAIL.includes(email);
+    }
+
+
+    // escuchar login / sesión
+    onAuthStateChanged(auth, (user) => {
+      // antes: cualquier user veía el panel
+      // ahora: solo si es el admin
+      if (user && isAdminEmail(user.email)) {
+        loginBox.style.display = "none";
+        adminPanel.style.display = "block";
+        adminUserSpan.textContent = user.email || "Admin";
+        listenForNotified();
+      } else {
+        loginBox.style.display = "block";
+        adminPanel.style.display = "none";
+        adminUserSpan.textContent = "Admin";
+      }
+    });
+
+    // botón login
+    document.getElementById("btn-login").addEventListener("click", async () => {
+      const email = document.getElementById("admin-email").value.trim();
+      const pass = document.getElementById("admin-pass").value.trim();
+      loginError.style.display = "none";
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, pass);
+        // si entra aquí, onAuthStateChanged se encarga
+        // pero si no es el admin, lo vamos a volver a mandar al login
+        if (!isAdminEmail(cred.user.email)) {
+          // cerramos de una vez para que no se quede sesión del que no es
+          await signOut(auth);
+          loginError.textContent = "Este correo no tiene permiso de admin.";
+          loginError.style.display = "block";
+        }
+      } catch (err) {
+        console.error(err);
+        loginError.textContent = "No se pudo iniciar sesión. Revisa correo/contraseña.";
+        loginError.style.display = "block";
+      }
+    });
+
+    // 👇 CERRAR SESIÓN
+    btnLogout.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+      } catch (err) {
+        console.error("Error al salir:", err);
+      }
+    });
+
+    // escuchar solo las "Notified"
+    function listenForNotified() {
+      const colRef = collection(db, "artifacts/app-test/public/data/consultations");
+      const qNotified = query(colRef, where("status", "==", "Notified"));
+
+      onSnapshot(qNotified, (snapshot) => {
+        if (snapshot.empty) {
+          rows.innerHTML = '<tr><td colspan="8">No hay solicitudes pendientes ✅</td></tr>';
+          return;
+        }
+
+        rows.innerHTML = "";
+        snapshot.forEach((docSnap) => {
+          const d = docSnap.data();
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${d.name || "-"}</td>
+            <td>${d.service || "-"}</td>
+            <td>${d.pickupDate || "-"}</td>
+            <td>${(d.countryCode || "") + " " + (d.phoneNumber || "")}</td>
+            <td>${d.email || "-"}</td>
+            <td>${d.details || "-"}</td>
+            <td><span class="status-pill">${d.status}</span></td>
+            <td>
+              <button class="btn-approve" data-id="${docSnap.id}" data-act="approve">Aprobar</button>
+              <button class="btn-reject" data-id="${docSnap.id}" data-act="reject">Rechazar</button>
+            </td>
+          `;
+          rows.appendChild(tr);
+        });
+      }, (err) => {
+        console.error("Error escuchando consultas:", err);
+        rows.innerHTML = '<tr><td colspan="8" style="color:red;">Error al cargar.</td></tr>';
+      });
+    }
+
+    // clicks aprobar / rechazar
+    document.addEventListener("click", async (e) => {
+      const btn = e.target;
+      if (!btn.dataset || !btn.dataset.id) return;
+      const docId = btn.dataset.id;
+      const act = btn.dataset.act; // approve | reject
+      const newStatus = act === "approve" ? "Approved" : "Rejected";
+
+      const ref = doc(db, "artifacts/app-test/public/data/consultations", docId);
+      try {
+        await updateDoc(ref, {
+          status: newStatus,
+          reviewedAt: new Date().toISOString()
+        });
+      } catch (err) {
+        alert("No se pudo actualizar: " + err.message);
+      }
+    });
+  </script>
+  <!-- fontawesome (si lo usas) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" defer></script>
 </body>
 </html>
